@@ -9,12 +9,11 @@ Arduino Sketches for ESP32-based chore organizer. There are two main components:
 ## Physical Screen and Input
 - Displays chores without needing to open a site
 - Can mark tasks complete	
-
-### Parts:
+## Parts:
 1. Adafruit Feather ESP32
 2. I2C LCD1602
 3. Joystick Module
-### Pin Assignments
+## Pin Assignments
 **Joystick:**   
 `VRX` -> `A2`   
 `VRY` -> `A3`  
@@ -24,11 +23,18 @@ Arduino Sketches for ESP32-based chore organizer. There are two main components:
 `SCA` -> `SCA`   
 `SCL` -> `SCL`
 
-### Setup
+## Setup
 1. Change network SSID and password in [ESP32-Chore-Organizer.ino](/ESP32-Chore-Organizer/ESP32-Chore-Organizer.ino) 
 2. Get website IP through boot sequence, or check serial monitor
 3. Enter IP into browser to access website
 ### Controls  
-Joystick up/down: cycle through chores  
-Joystick left/right: Scroll through chore name  
-Press Joystick: Mark chore complete/incomplete
+*Joystick up/down:* cycle through chores  
+*Joystick left/right:* Scroll through chore name  
+*Press Joystick:* Mark chore complete/incomplete
+
+## Troubleshooting
+Joystick Not Working: Try the [Joystick_Test.ino](/Joystick_Test/Joystick_Test.ino) and check the serial monitor. Can also try A0/A1 (Remember to modify pin assignments!)
+LCD Not Displaying: Try the [LCD_Testt.ino](/LCD_Test/LCD_Test.ino). Also adjust the potentiometer on the back of the LCD for max contrast
+Missing Libraries: Open Library Manager on sidebar and install necessary libraries.
+
+
