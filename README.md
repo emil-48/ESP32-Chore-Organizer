@@ -7,8 +7,8 @@ Arduino Sketches for ESP32-based chore organizer. There are two main components:
 - Place to perform more complex tasks, other than marking complete or incomplete
 - Editing, creating new chores
 ## Physical Screen and Input
-	- Displays chores without needing to open a site
-	- Can mark tasks complete	
+- Displays chores without needing to open a site
+- Can mark tasks complete	
 
 ### Parts:
 1. Adafruit Feather ESP32
@@ -28,7 +28,7 @@ Arduino Sketches for ESP32-based chore organizer. There are two main components:
 1. Change network SSID and password in [ESP32-Chore-Organizer.ino](/ESP32-Chore-Organizer/ESP32-Chore-Organizer.ino) 
 2. Get website IP through boot sequence, or check serial monitor
 3. Enter IP into browser to access website
-### Controls
-Joystick up/down: cycle through chores
-Joystick left/right: Scroll through chore name
+### Controls  
+Joystick up/down: cycle through chores  
+Joystick left/right: Scroll through chore name  
 Press Joystick: Mark chore complete/incomplete
