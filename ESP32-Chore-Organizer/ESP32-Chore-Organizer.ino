@@ -14,8 +14,8 @@ https://github.com/emil-48/ESP32-Chore-Organizer
 #include <NTPClient.h>
 
 // WiFi credentials - replace with your network details
-const char* ssid = "gojo";
-const char* password = "spartan2026";
+const char* ssid = "WIFI";
+const char* password = "PASSWORD";
 
 // Pin definitions
 //SDA_PIN = SDA;
