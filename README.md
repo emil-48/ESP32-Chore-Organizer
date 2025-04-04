@@ -40,7 +40,7 @@ This is a household chore tracking system with both a physical interface (LCD sc
 
 ## Troubleshooting
 Joystick Not Working: Try the [Joystick_Test.ino](/Joystick_Test/Joystick_Test.ino) and check the serial monitor. Can also try A0/A1 (Remember to modify pin assignments!)  
-LCD Not Displaying: Try the [LCD_Testt.ino](/LCD_Test/LCD_Test.ino). Also adjust the potentiometer on the back of the LCD for max contrast  
+LCD Not Displaying: Try the [LCD_Test.ino](/LCD_Test/LCD_Test.ino). Also adjust the potentiometer on the back of the LCD for max contrast  
 Missing Libraries: Open Library Manager on sidebar and install necessary libraries.
 
 ## Software Components
