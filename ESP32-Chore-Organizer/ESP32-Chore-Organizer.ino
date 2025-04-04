@@ -1,9 +1,14 @@
+/*************
+Chore Organizer Dashboard and Web Interface
+Run on Adafruit Feather ESP32 V2
+https://github.com/emil-48/ESP32-Chore-Organizer
+*************/
 #include <WiFi.h>
 #include <WebServer.h>
 #include <SPIFFS.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
-#include <ArduinoJson.h>  // Make sure this is ArduinoJson 7.x
+#include <ArduinoJson.h>
 #include <TimeLib.h>
 #include <WiFiUdp.h>
 #include <NTPClient.h>
@@ -13,10 +18,10 @@ const char* ssid = "gojo";
 const char* password = "spartan2026";
 
 // Pin definitions
-const int SDA_PIN = SDA;
-const int SCL_PIN = SCL;
-const int JOYSTICK_X_PIN = A0;
-const int JOYSTICK_Y_PIN = A1;
+//SDA_PIN = SDA;
+//SCL_PIN = SCL;
+const int JOYSTICK_X_PIN = A2;
+const int JOYSTICK_Y_PIN = A3;
 const int JOYSTICK_SW_PIN = 15;
 
 // LCD setup
@@ -33,7 +38,7 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org");
 struct Chore {
   String name;
   String person;
-  String frequency;  // "weekly" or "monthly"
+  String frequency;  // "daily", "weekly" or "monthly"
   bool completed;
   time_t lastCompleted;
   time_t nextDue;
@@ -46,11 +51,16 @@ bool joystickPressed = false;
 unsigned long lastJoystickDebounce = 0;
 const int debounceDelay = 300;  // ms
 
+// Variables for name scrolling
+int scrollPosition = 0;
+unsigned long lastScrollTime = 0;
+const int scrollDelay = 150;  // ms
+
 void setup() {
   Serial.begin(115200);
   
   // Initialize I2C for LCD
-  Wire.begin(SDA_PIN, SCL_PIN);
+  //  Wire.begin(SDA_PIN, SCL_PIN);
   
   // Initialize LCD
   lcd.init();
@@ -135,6 +145,12 @@ void loop() {
   
   // Read and process joystick input
   handleJoystick();
+
+  // Handle name scrolling if needed
+  handleNameScrolling();
+
+  // Small delay to prevent CPU hogging
+  delay(10);
   
   // Update all chores status periodically (every minute)
   static unsigned long lastCheckTime = 0;
@@ -152,6 +168,43 @@ void loop() {
   }
 }
 
+// Handle name scrolling based on joystick X position
+void handleNameScrolling() {
+  if (chores.empty()) {
+    return;
+  }
+  
+  // Get current chore
+  Chore& chore = chores[currentChoreIndex];
+  
+  // Only scroll if name is longer than available space (11 chars - 4 for checkbox)
+  if (chore.name.length() <= 11) {
+    return;
+  }
+  
+  // Read X position and determine if scrolling is needed
+  int joyX = analogRead(JOYSTICK_X_PIN);
+  
+  // Define joystick thresholds based on center position of ~1950
+  const int JOYSTICK_CENTER_LOW = 1700;
+  const int JOYSTICK_CENTER_HIGH = 2200;
+  
+  if (millis() - lastScrollTime > scrollDelay) {
+    // Scroll left (right on joystick)
+    if (joyX > JOYSTICK_CENTER_HIGH && scrollPosition < chore.name.length() - 11) {
+      scrollPosition++;
+      lastScrollTime = millis();
+      updateLCD();
+    }
+    // Scroll right (left on joystick)
+    else if (joyX < JOYSTICK_CENTER_LOW && scrollPosition > 0) {
+      scrollPosition--;
+      lastScrollTime = millis();
+      updateLCD();
+    }
+  }
+}
+
 // Load chores from file
 void loadChores() {
   chores.clear();
@@ -159,7 +212,7 @@ void loadChores() {
   if (SPIFFS.exists("/chores.json")) {
     File file = SPIFFS.open("/chores.json", "r");
     if (file) {
-      StaticJsonDocument<4096> doc;  // Use StaticJsonDocument with template parameter for size
+      StaticJsonDocument<4096> doc;
       DeserializationError error = deserializeJson(doc, file);
       
       if (!error) {
@@ -185,7 +238,7 @@ void loadChores() {
 
 // Save chores to file
 void saveChores() {
-  StaticJsonDocument<4096> doc;  // Use StaticJsonDocument with template parameter for size
+  StaticJsonDocument<4096> doc;
   JsonArray array = doc.to<JsonArray>();
   
   for (Chore& chore : chores) {
@@ -212,7 +265,23 @@ void calculateNextDueDate(Chore& chore) {
     return;
   }
   
-  if (chore.frequency == "weekly") {
+  if (chore.frequency == "daily") {
+    // Due next day at midnight
+    time_t nextDue = chore.lastCompleted;
+    
+    // Get current day components
+    tmElements_t tm;
+    breakTime(nextDue, tm);
+    
+    // Set to next day, midnight
+    tm.Hour = 0;
+    tm.Minute = 0;
+    tm.Second = 0;
+    nextDue = makeTime(tm) + (24 * 3600);  // Add 24 hours for next day
+    
+    chore.nextDue = nextDue;
+  }
+  else if (chore.frequency == "weekly") {
     // Due next Monday after completion date
     time_t nextDue = chore.lastCompleted + (7 * 24 * 3600);  // Add 7 days
     
@@ -292,12 +361,15 @@ void updateLCD() {
   lcd.setCursor(0, 0);
   lcd.print(chore.completed ? "[X] " : "[ ] ");
   
-  // Truncate name if too long
-  String name = chore.name;
-  if (name.length() > 11) {
-    name = name.substring(0, 10) + "~";
+  // Handle scrolling for long names
+  String displayName;
+  if (chore.name.length() > 11) {
+    // If name is too long, show a portion based on scroll position
+    displayName = chore.name.substring(scrollPosition, scrollPosition + 11);
+  } else {
+    displayName = chore.name;
   }
-  lcd.print(name);
+  lcd.print(displayName);
   
   // Line 2: Person and days till due
   lcd.setCursor(0, 1);
@@ -312,12 +384,18 @@ void updateLCD() {
   }
   lcd.print(person);
   
-  // Days until due
+  // Days until due - show "tomorrow" for completed daily chores with 0 days
   int daysUntil = getDaysUntilDue(chore);
-  lcd.setCursor(11, 1);
+  
   if (daysUntil == 0 && !chore.completed) {
+    lcd.setCursor(11, 1);
     lcd.print("DUE!");
+  } else if (daysUntil == 0 && chore.completed && chore.frequency == "daily") {
+    // For completed daily tasks, show "tomorrow" instead of "0d"
+    lcd.setCursor(11, 1);
+    lcd.print("tmrw");
   } else {
+    lcd.setCursor(11, 1);
     lcd.print(daysUntil);
     lcd.print("d");
   }
@@ -334,6 +412,8 @@ void handleJoystick() {
     joystickPressed = true;
     lastJoystickDebounce = millis();
     
+    Serial.println("Joystick button pressed");
+    
     // Toggle completion of current chore
     if (!chores.empty()) {
       chores[currentChoreIndex].completed = !chores[currentChoreIndex].completed;
@@ -345,25 +425,48 @@ void handleJoystick() {
       }
       
       saveChores();
+      // Reset scroll position when toggling a chore
+      scrollPosition = 0;
       updateLCD();
     }
   } else if (!buttonState) {
     joystickPressed = false;
   }
   
-  // Navigate through chores with joystick Y-axis - use a higher debounce value
-  static unsigned long lastNavigationDebounce = 0;
-  const int navigationDebounceDelay = 500;  // Increased to 500ms to prevent rapid scrolling
-  
+  // Simplified joystick navigation with clear thresholds
   if (!chores.empty()) {
-    if (joyY < 1000 && millis() - lastNavigationDebounce > navigationDebounceDelay) {  // Up
+    static unsigned long lastNavigationDebounce = 0;
+    const int navigationDebounceDelay = 300;  // Reduced for better responsiveness
+    
+    // Define joystick thresholds based on center position of ~1950
+    const int JOYSTICK_CENTER_LOW = 1000;
+    const int JOYSTICK_CENTER_HIGH = 3000;
+    
+    static bool inCenterPosition = true;
+    
+    // Check if joystick is in center position
+    bool isCenter = (joyY >= JOYSTICK_CENTER_LOW && joyY <= JOYSTICK_CENTER_HIGH);
+    
+    // If we're in center position, allow for next movement
+    if (isCenter) {
+      inCenterPosition = true;
+    } 
+    // If we've returned to center and now moved, and debounce time passed
+    else if (inCenterPosition && millis() - lastNavigationDebounce > navigationDebounceDelay) {
       lastNavigationDebounce = millis();
-      currentChoreIndex = (currentChoreIndex + 1) % chores.size();
-      updateLCD();
-    } else if (joyY > 3000 && millis() - lastNavigationDebounce > navigationDebounceDelay) {  // Down
-      lastNavigationDebounce = millis();
-      currentChoreIndex = (currentChoreIndex - 1 + chores.size()) % chores.size();
-      updateLCD();
+      inCenterPosition = false;
+      
+      if (joyY < JOYSTICK_CENTER_LOW) {  // Up movement
+        currentChoreIndex = (currentChoreIndex + 1) % chores.size();
+        // Reset scroll position when changing chores
+        scrollPosition = 0;
+        updateLCD();
+      } else if (joyY > JOYSTICK_CENTER_HIGH) {  // Down movement
+        currentChoreIndex = (currentChoreIndex - 1 + chores.size()) % chores.size();
+        // Reset scroll position when changing chores
+        scrollPosition = 0;
+        updateLCD();
+      }
     }
   }
 }
@@ -403,6 +506,7 @@ void handleRootPage() {
     "<div class=\"form-group\">"
     "<label>Frequency:</label>"
     "<select id=\"chore-frequency\">"
+    "<option value=\"daily\">Daily</option>"
     "<option value=\"weekly\">Weekly</option>"
     "<option value=\"monthly\">Monthly</option>"
     "</select>"
@@ -423,6 +527,7 @@ void handleRootPage() {
     "<div class=\"form-group\">"
     "<label>Frequency:</label>"
     "<select id=\"edit-frequency\">"
+    "<option value=\"daily\">Daily</option>"
     "<option value=\"weekly\">Weekly</option>"
     "<option value=\"monthly\">Monthly</option>"
     "</select>"
@@ -449,7 +554,11 @@ void handleRootPage() {
     "      nameSpan.textContent = \" \" + chore.name + \" (\" + chore.person + \") - \" + chore.frequency;"
     "      const daysSpan = document.createElement(\"span\");"
     "      if (chore.completed) {"
-    "        daysSpan.textContent = \" - Due in \" + chore.daysUntil + \" days\";"
+    "        if (chore.frequency === \"daily\" && chore.daysUntil === 0) {"
+    "          daysSpan.textContent = \" - Due tomorrow\";"
+    "        } else {"
+    "          daysSpan.textContent = \" - Due in \" + chore.daysUntil + \" days\";"
+    "        }"
     "      }"
     "      const actions = document.createElement(\"div\");"
     "      actions.className = \"actions\";"
@@ -680,6 +789,8 @@ void handleUpdateChore() {
       }
       
       saveChores();
+      // Reset scroll position since chore name might have changed
+      scrollPosition = 0;
       updateLCD();
       
       server.send(200, "application/json", "{\"success\":true}");
