@@ -9,3 +9,17 @@ Arduino Sketches for ESP32-based chore organizer. There are two main components:
 ## Physical Screen and Input
 	- Displays chores without needing to open a site
 	- Can mark tasks complete	
+
+### Parts:
+Adafruit Feather ESP32
+I2C LCD1602
+Joystick Module
+### Pin Assignments
+**Joystick**
+`VRX` -> `A2` 
+`VRY` -> `A3`
+`SW` -> `15`
+
+**LCD Display**
+`SCA` -> `SCA`
+`SCL` -> `SCL`
