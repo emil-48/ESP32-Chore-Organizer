@@ -16,8 +16,8 @@ Arduino Sketches for ESP32-based chore organizer. There are two main components:
 3. Joystick Module
 ### Pin Assignments
 **Joystick:** 
-- `VRX` -> `A2`
-- `VRY` -> `A3` 
+`VRX` -> `A2`   
+`VRY` -> `A3` 
 - `SW` -> `15`
 
 **LCD Display:** 
