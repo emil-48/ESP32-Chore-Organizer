@@ -6,8 +6,8 @@
   Component: Joystick module
 */
 
-const int xPin = A0;  //the VRX attach to
-const int yPin = A1;  //the VRY attach to
+const int xPin = A2;  //the VRX attach to
+const int yPin = A3;  //the VRY attach to
 
 void setup() {
   Serial.begin(115200);  // Begin serial communication with a baud rate of 9600
