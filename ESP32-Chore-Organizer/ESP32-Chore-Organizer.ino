@@ -1,8 +1,8 @@
-/*************
+/**************************************************
 Chore Organizer Dashboard and Web Interface
 Run on Adafruit Feather ESP32 V2
 https://github.com/emil-48/ESP32-Chore-Organizer
-*************/
+**************************************************/
 #include <WiFi.h>
 #include <WebServer.h>
 #include <SPIFFS.h>
