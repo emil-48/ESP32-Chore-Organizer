@@ -15,14 +15,14 @@ Arduino Sketches for ESP32-based chore organizer. There are two main components:
 2. I2C LCD1602
 3. Joystick Module
 ### Pin Assignments
-**Joystick:** 
+**Joystick:**   
 `VRX` -> `A2`   
-`VRY` -> `A3` 
-- `SW` -> `15`
+`VRY` -> `A3`  
+`SW` -> `15`
 
-**LCD Display:** 
-- `SCA` -> `SCA` 
-- `SCL` -> `SCL`
+**LCD Display:**   
+`SCA` -> `SCA`   
+`SCL` -> `SCL`
 
 ### Setup
 1. Change network SSID and password in [ESP32-Chore-Organizer.ino](/ESP32-Chore-Organizer/ESP32-Chore-Organizer.ino) 
