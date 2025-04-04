@@ -33,8 +33,8 @@ Arduino Sketches for ESP32-based chore organizer. There are two main components:
 *Press Joystick:* Mark chore complete/incomplete
 
 ## Troubleshooting
-Joystick Not Working: Try the [Joystick_Test.ino](/Joystick_Test/Joystick_Test.ino) and check the serial monitor. Can also try A0/A1 (Remember to modify pin assignments!)
-LCD Not Displaying: Try the [LCD_Testt.ino](/LCD_Test/LCD_Test.ino). Also adjust the potentiometer on the back of the LCD for max contrast
+Joystick Not Working: Try the [Joystick_Test.ino](/Joystick_Test/Joystick_Test.ino) and check the serial monitor. Can also try A0/A1 (Remember to modify pin assignments!)  
+LCD Not Displaying: Try the [LCD_Testt.ino](/LCD_Test/LCD_Test.ino). Also adjust the potentiometer on the back of the LCD for max contrast  
 Missing Libraries: Open Library Manager on sidebar and install necessary libraries.
 
 
