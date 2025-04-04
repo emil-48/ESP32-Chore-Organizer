@@ -16,9 +16,9 @@ I2C LCD1602
 Joystick Module
 ### Pin Assignments
 **Joystick:** 
-	`VRX` -> `A2`
-	`VRY` -> `A3`, 
-	`SW` -> `15`
+- `VRX` -> `A2`
+- `VRY` -> `A3`, 
+- `SW` -> `15`
 
 **LCD Display:** `SCA` -> `SCA`, `SCL` -> `SCL`
 
