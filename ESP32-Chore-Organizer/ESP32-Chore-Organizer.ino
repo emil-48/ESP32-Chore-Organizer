@@ -13,9 +13,9 @@ https://github.com/emil-48/ESP32-Chore-Organizer
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 
-// WiFi credentials - replace with your network details
-const char* ssid = "WIFI";
-const char* password = "PASSWORD";
+// Wifi settings
+const char* ssid = "Lime";
+const char* password = "cafebabe2x2x";
 
 // Pin definitions
 //SDA_PIN = SDA;
@@ -30,7 +30,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);  // I2C address 0x27, 16 columns, 2 rows
 // Web server
 WebServer server(80);
 
-// NTP for accurate time
+// NTP for time
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
 
@@ -47,6 +47,8 @@ struct Chore {
 // Global variables
 std::vector<Chore> chores;
 int currentChoreIndex = 0;
+
+// Variables for joystick
 bool joystickPressed = false;
 unsigned long lastJoystickDebounce = 0;
 const int debounceDelay = 300;  // ms
@@ -58,10 +60,7 @@ const int scrollDelay = 150;  // ms
 
 void setup() {
   Serial.begin(115200);
-  
-  // Initialize I2C for LCD
-  //  Wire.begin(SDA_PIN, SCL_PIN);
-  
+
   // Initialize LCD
   lcd.init();
   lcd.backlight();
@@ -94,6 +93,7 @@ void setup() {
     wifiAttempts++;
   }
   
+  // Wifi error message
   if (WiFi.status() != WL_CONNECTED) {
     lcd.clear();
     lcd.setCursor(0, 0);
@@ -170,6 +170,7 @@ void loop() {
 
 // Handle name scrolling based on joystick X position
 void handleNameScrolling() {
+  // Do nothing if no chores
   if (chores.empty()) {
     return;
   }
@@ -433,7 +434,7 @@ void handleJoystick() {
     joystickPressed = false;
   }
   
-  // Simplified joystick navigation with clear thresholds
+  // Joystick navigation
   if (!chores.empty()) {
     static unsigned long lastNavigationDebounce = 0;
     const int navigationDebounceDelay = 300;  // Reduced for better responsiveness
