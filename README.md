@@ -29,6 +29,12 @@ This is a household chore tracking system with both a physical interface (LCD sc
 **LCD Display:**   
 `SCA` -> `SCA`   
 `SCL` -> `SCL`
+
+**LED Module:**   
+`R` -> `27`   
+`Y` -> `12`  
+`G` -> `33`
+
 ## Setup
 1. Change network SSID and password in [ESP32-Chore-Organizer.ino](/ESP32-Chore-Organizer/ESP32-Chore-Organizer.ino) 
 2. Get website IP through boot sequence, or check serial monitor
